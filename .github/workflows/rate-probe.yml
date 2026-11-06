@@ -1,16 +1,17 @@
 name: rate probe
-# Measures how often Apple's pickup endpoint can be polled before it starts returning HTTP 541. Sends no alerts.
+# Compares how long Apple's pickup endpoint keeps answering with and without cookies at 5s polling. Sends no alerts.
 on:
   workflow_dispatch:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        interval: [10, 20, 30, 60]
+        cookies: ["on", "off"]
     steps:
       - uses: actions/checkout@v4
-      - run: curl -s https://api.ipify.org; echo
-      - run: python3 checker.py --interval ${{ matrix.interval }} --duration 900 --state /tmp/s.json
+      - run: python3 checker.py --interval 5 --duration 360 --state /tmp/s.json
+        env:
+          NO_COOKIES: ${{ matrix.cookies == 'off' && '1' || '' }}

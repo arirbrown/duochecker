@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Polls Apple's in-store pickup availability for iPhone Duo 512GB in NYC and Boston stores and alerts on stock."""
 import argparse
+from http.cookiejar import CookieJar
 import json
 import os
 import sys
@@ -49,9 +50,14 @@ def log(msg):
     print(f"[{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}Z] {msg}", flush=True)
 
 
+# Keep cookies between requests like a browser does; Apple blocks cookieless clients after ~16 checks.
+OPENER = urllib.request.build_opener() if os.getenv("NO_COOKIES") else \
+    urllib.request.build_opener(urllib.request.HTTPCookieProcessor(CookieJar()))
+
+
 def http(url, data=None, headers=None, timeout=20):
     req = urllib.request.Request(url, data=data, headers={"User-Agent": UA, **(headers or {})})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
+    with OPENER.open(req, timeout=timeout) as r:
         return r.status, r.read().decode("utf-8", "replace")
 
 
