@@ -14,9 +14,10 @@ on:
     paths: ["checker.py", ".github/workflows/check.yml"]
 
 # One checker at a time; the next scheduled run waits in the queue and takes over when this one ends.
+# A push (code change) replaces the running checker immediately.
 concurrency:
   group: duochecker
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
   check:
@@ -46,6 +47,6 @@ jobs:
           key: state-${{ github.run_id }}
           restore-keys: state-
 
-      - name: Watch stock (~5h45m, every 60s)
+      - name: Watch stock (~5h45m, every 5s)
         if: ${{ !inputs.test_notify }}
-        run: python3 checker.py --interval 60 --duration 20700
+        run: python3 checker.py --interval 5 --duration 20700

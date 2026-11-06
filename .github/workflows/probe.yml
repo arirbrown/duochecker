@@ -1,8 +1,0 @@
-name: probe
-on: push
-jobs:
-  probe:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: python3 checker.py --once --state /tmp/s.json

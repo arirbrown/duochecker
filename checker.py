@@ -163,7 +163,7 @@ def save_state(path, keys):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--interval", type=int, default=int(os.getenv("CHECK_INTERVAL", "60")))
+    ap.add_argument("--interval", type=int, default=int(os.getenv("CHECK_INTERVAL", "5")))
     ap.add_argument("--duration", type=int, default=int(os.getenv("RUN_DURATION", "0")),
                     help="seconds to keep looping (0 = forever)")
     ap.add_argument("--once", action="store_true")
@@ -178,14 +178,16 @@ def main():
 
     known = load_state(args.state)
     deadline = time.time() + args.duration if args.duration else None
-    failures = 0
+    failures = checks = 0
     while True:
+        checks += 1
         try:
             in_stock, seen = check()
             failures = 0
             current = set(in_stock)
             new = {k: v for k, v in in_stock.items() if k not in known}
-            log(f"checked {len(seen)} stores: {len(current)} in stock, {len(new)} new")
+            if new or checks % 60 == 1:
+                log(f"checked {len(seen)} stores: {len(current)} in stock, {len(new)} new")
             if new:
                 msg = format_alert(new)
                 log(msg)
@@ -198,9 +200,11 @@ def main():
         except Exception as e:
             failures += 1
             log(f"check failed ({failures}): {e}")
-        if args.once or (deadline and time.time() + args.interval > deadline):
+        # Back off (up to 5 min) if Apple starts erroring or rate-limiting.
+        wait = min(300, args.interval * 2 ** failures) if failures else args.interval
+        if args.once or (deadline and time.time() + wait > deadline):
             break
-        time.sleep(args.interval)
+        time.sleep(wait)
 
 
 if __name__ == "__main__":
