@@ -15,6 +15,12 @@ jobs:
           python3 - <<'PY'
           import json, os, urllib.request
           tok = os.environ["TELEGRAM_BOT_TOKEN"]
+          def api(m):
+              with urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/{m}", timeout=20) as r:
+                  return json.load(r)
+          me = api("getMe").get("result", {})
+          print(f"BOT @{me.get('username')} name={me.get('first_name')} can_read_all_group_messages={me.get('can_read_all_group_messages')}")
+          print("WEBHOOK", api("getWebhookInfo").get("result", {}).get("url") or "(none)")
           with urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/getUpdates", timeout=20) as r:
               data = json.load(r)
           chats = {}
