@@ -179,6 +179,11 @@ def main():
                "512GB (Night Sky or Star White) is available for pickup in NYC or Boston.")
         return
 
+    drill = os.getenv("DRILL_PART")
+    if drill:
+        PARTS[drill] = "DRILL item (not an iPhone)"
+        BUY_URLS[drill] = f"https://www.apple.com/shop/product/{drill}"
+
     channels = [name for name, var in (("whatsapp", "CALLMEBOT_RECIPIENTS"), ("telegram", "TELEGRAM_BOT_TOKEN"),
                                        ("ntfy", "NTFY_TOPIC"), ("sms", "TWILIO_TO")) if os.getenv(var)]
     log(f"alert channels: {', '.join(channels) or 'NONE (set secrets!)'}; checking every {args.interval}s")
@@ -197,6 +202,8 @@ def main():
                 log(f"checked {len(seen)} stores: {len(current)} in stock, {len(new)} new")
             if new:
                 msg = format_alert(new)
+                if drill:
+                    msg = "DRILL, NOT REAL STOCK. This is a test of the stock alert path.\n" + msg
                 log(msg)
                 notify(msg)
             gone = known - current
@@ -210,6 +217,7 @@ def main():
         # Back off (up to 5 min) if Apple starts erroring or rate-limiting.
         wait = min(300, args.interval * 2 ** failures) if failures else args.interval
         if args.once or (deadline and time.time() + wait > deadline):
+            log(f"done: {checks} checks, {failures} failing at exit")
             break
         time.sleep(wait)
 

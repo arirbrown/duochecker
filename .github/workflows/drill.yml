@@ -1,0 +1,15 @@
+name: alert drill
+# Watches an item that IS in stock (USB-C to Lightning Adapter) for 60s to prove the check -> alert path end to end.
+on:
+  workflow_dispatch:
+jobs:
+  drill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 checker.py --interval 5 --duration 60 --state /tmp/drill-state.json
+        env:
+          DRILL_PART: MUQX3AM/A
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
