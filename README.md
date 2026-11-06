@@ -17,7 +17,7 @@ Set any of these as repo secrets (Settings → Secrets and variables → Actions
 
 **WhatsApp key (CallMeBot):** save `+34 684 728 023` as a contact, then send it `I allow callmebot to send me messages` on WhatsApp. It replies with your API key. Each person who wants alerts does this on their own phone.
 
-**Test alerts:** Actions → duochecker → Run workflow → tick "Send a test alert".
+**Test alerts:** Actions → test-alert → Run workflow. After adding or changing secrets, push any change to `checker.py` (or re-run the latest push run) so the running checker picks them up.
 
 ## Run locally
 

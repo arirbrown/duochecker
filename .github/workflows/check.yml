@@ -4,14 +4,9 @@ on:
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
-    inputs:
-      test_notify:
-        description: "Send a test alert and exit"
-        type: boolean
-        default: false
   push:
     branches: [main]
-    paths: ["checker.py", ".github/workflows/check.yml"]
+    paths: ["checker.py", ".github/workflows/check.yml", ".github/workflows/test-alert.yml"]
 
 # One checker at a time; the next scheduled run waits in the queue and takes over when this one ends.
 # A push (code change) replaces the running checker immediately.
@@ -35,12 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Send test alert
-        if: ${{ inputs.test_notify }}
-        run: python3 checker.py --test-notify
-
       - name: Restore last-known stock
-        if: ${{ !inputs.test_notify }}
         uses: actions/cache@v4
         with:
           path: state.json
@@ -48,5 +38,4 @@ jobs:
           restore-keys: state-
 
       - name: Watch stock (~5h45m, every 5s)
-        if: ${{ !inputs.test_notify }}
         run: python3 checker.py --interval 5 --duration 20700
