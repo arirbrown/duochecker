@@ -175,7 +175,7 @@ def main():
     args = ap.parse_args()
 
     if args.test_notify:
-        notify("duochecker test: alerts are working. You'll get a message like this when an iPhone Duo "
+        notify(os.getenv("TEST_TEXT") or "duochecker test: alerts are working. You'll get a message like this when an iPhone Duo "
                "512GB (Night Sky or Star White) is available for pickup in NYC or Boston.")
         return
 

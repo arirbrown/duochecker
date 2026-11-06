@@ -2,6 +2,10 @@ name: test-alert
 
 on:
   workflow_dispatch:
+    inputs:
+      text:
+        description: "Custom message (optional)"
+        required: false
 
 jobs:
   test:
@@ -15,6 +19,7 @@ jobs:
       TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
       TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
       TWILIO_TO: ${{ secrets.TWILIO_TO }}
+      TEST_TEXT: ${{ inputs.text }}
     steps:
       - uses: actions/checkout@v4
       - run: python3 checker.py --test-notify
