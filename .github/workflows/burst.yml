@@ -1,0 +1,29 @@
+name: morning burst
+# 6-7am ET is the high-volume restock window: check every 30s then.
+# Scheduled for 5:30 ET because GitHub cron often starts late; both crons exist so it works in EST and EDT.
+on:
+  schedule:
+    - cron: "30 9 * * *"
+    - cron: "30 10 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: burst
+
+jobs:
+  burst:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      CALLMEBOT_RECIPIENTS: ${{ secrets.CALLMEBOT_RECIPIENTS }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+      TWILIO_TO: ${{ secrets.TWILIO_TO }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for 6:00 ET, then check every 30s until 7:00 ET
+        run: bash burst.sh
