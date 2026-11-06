@@ -37,5 +37,5 @@ jobs:
           key: state-${{ github.run_id }}
           restore-keys: state-
 
-      - name: Watch stock (~5h45m, every 5s)
-        run: python3 checker.py --interval 5 --duration 20700
+      - name: Watch stock (~5h45m, every 90s)
+        run: python3 checker.py --interval 90 --duration 20700

@@ -1,17 +1,15 @@
 name: rate probe
-# Compares how long Apple's pickup endpoint keeps answering with and without cookies at 5s polling. Sends no alerts.
+# Measures whether a polling interval stays under Apple's per-IP limit for an hour. Sends no alerts.
 on:
   workflow_dispatch:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 70
     strategy:
       fail-fast: false
       matrix:
-        cookies: ["on", "off"]
+        interval: [60, 90]
     steps:
       - uses: actions/checkout@v4
-      - run: python3 checker.py --interval 5 --duration 360 --state /tmp/s.json
-        env:
-          NO_COOKIES: ${{ matrix.cookies == 'off' && '1' || '' }}
+      - run: python3 checker.py --interval ${{ matrix.interval }} --duration 3600 --state /tmp/s.json
