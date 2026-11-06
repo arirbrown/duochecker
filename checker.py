@@ -172,7 +172,7 @@ def save_state(path, keys):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--interval", type=int, default=int(os.getenv("CHECK_INTERVAL", "90")))
+    ap.add_argument("--interval", type=int, default=int(os.getenv("CHECK_INTERVAL", "300")))
     ap.add_argument("--duration", type=int, default=int(os.getenv("RUN_DURATION", "0")),
                     help="seconds to keep looping (0 = forever)")
     ap.add_argument("--once", action="store_true")

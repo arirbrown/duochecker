@@ -1,8 +1,8 @@
 # duochecker
 
-Watches Apple's in-store pickup availability for **iPhone Duo 512GB** (Night Sky `MK1H4LL/A`, Star White `MK1G4LL/A`) at every Apple Store in **New York City** (12 stores, all 5 boroughs) and **Boston** (Boylston Street, CambridgeSide, Chestnut Hill). It checks every 90 seconds and sends an alert when a store goes from unavailable to available.
+Watches Apple's in-store pickup availability for **iPhone Duo 512GB** (Night Sky `MK1H4LL/A`, Star White `MK1G4LL/A`) at every Apple Store in **New York City** (12 stores, all 5 boroughs) and **Boston** (Boylston Street, CambridgeSide, Chestnut Hill). It checks every 5 minutes (every 30 seconds from 6 to 7am ET, see `burst.sh`) and sends an alert when a store goes from unavailable to available.
 
-Why 90 seconds: Apple returns HTTP 541 to an IP after roughly 50 requests in a short window (each check is 3 requests), whatever the interval or cookies, and the block lasts 10+ minutes. 5-30s polling got blocked within 1-9 minutes; 60s+ did not in testing.
+Why 5 minutes: Apple returns HTTP 541 to an IP after roughly 10-20 checks (each check is 3 requests) at any interval from 5s to 3 min, with or without cookies, and the block lasts about 30 minutes. A 5-minute interval ran for an hour without a block.
 
 Runs free on GitHub Actions (`.github/workflows/check.yml`): each job loops for about 5h45m, and the next scheduled run waits in the queue to take over, so checking never stops. You're alerted once per store/color when it comes in stock. If that store sells out and restocks, you're alerted again.
 
@@ -24,7 +24,7 @@ Set any of these as repo secrets (Settings → Secrets and variables → Actions
 ## Run locally
 
 ```bash
-CALLMEBOT_RECIPIENTS="+19175551234:123456" python3 checker.py            # loop forever, every 90s
+CALLMEBOT_RECIPIENTS="+19175551234:123456" python3 checker.py            # loop forever, every 5 min
 python3 checker.py --once                                                # single check
 CALLMEBOT_RECIPIENTS="+19175551234:123456" python3 checker.py --test-notify
 ```
