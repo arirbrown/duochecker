@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        interval: [60, 90]
+        interval: [180, 300]
     steps:
       - uses: actions/checkout@v4
       - run: python3 checker.py --interval ${{ matrix.interval }} --duration 3600 --state /tmp/s.json
