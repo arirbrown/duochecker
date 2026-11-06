@@ -1,0 +1,29 @@
+name: telegram-chat-id
+
+# Prints the chat IDs of groups the bot has seen recently (send /start@<botname> in the group first).
+on:
+  workflow_dispatch:
+
+jobs:
+  find:
+    runs-on: ubuntu-latest
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    steps:
+      - name: List chats from getUpdates
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          tok = os.environ["TELEGRAM_BOT_TOKEN"]
+          with urllib.request.urlopen(f"https://api.telegram.org/bot{tok}/getUpdates", timeout=20) as r:
+              data = json.load(r)
+          chats = {}
+          for u in data.get("result", []):
+              for key in ("message", "my_chat_member", "edited_message", "channel_post"):
+                  c = (u.get(key) or {}).get("chat")
+                  if c:
+                      chats[c["id"]] = (c.get("type"), c.get("title") or c.get("first_name"))
+          print("ok:", data.get("ok"), "updates:", len(data.get("result", [])))
+          for cid, (typ, title) in chats.items():
+              print(f"CHAT id={cid} type={typ} title={title}")
+          PY

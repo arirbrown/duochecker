@@ -30,3 +30,9 @@ CALLMEBOT_RECIPIENTS="+19175551234:123456" python3 checker.py --test-notify
 Only the Python standard library is used. Stores and zip codes are set in `STORES` / `QUERY_ZIPS` in `checker.py`.
 
 Note: GitHub pauses scheduled workflows in public repos after 60 days without commits. To resume, click "Enable workflow" in the Actions tab.
+
+## Telegram group setup
+
+1. In Telegram, message @BotFather, send `/newbot`, and save the token as the `TELEGRAM_BOT_TOKEN` secret.
+2. Create a group, add the bot, and send `/start@<botusername>` in the group.
+3. Run Actions → telegram-chat-id. The group's `CHAT id=-100...` line goes in the `TELEGRAM_CHAT_ID` secret.
