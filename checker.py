@@ -101,15 +101,18 @@ def notify_callmebot(text):
 
 
 def notify_telegram(text):
-    token, chat = os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
-    if not (token and chat):
+    # TELEGRAM_CHAT_ID can be a group id or a comma-separated list of chat ids.
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chats = [c.strip() for c in os.getenv("TELEGRAM_CHAT_ID", "").split(",") if c.strip()]
+    if not token:
         return
-    data = urllib.parse.urlencode({"chat_id": chat, "text": text, "disable_web_page_preview": "true"}).encode()
-    try:
-        status, _ = http(f"https://api.telegram.org/bot{token}/sendMessage", data=data)
-        log(f"telegram: HTTP {status}")
-    except Exception as e:
-        log(f"telegram failed: {e}")
+    for chat in chats:
+        data = urllib.parse.urlencode({"chat_id": chat, "text": text, "disable_web_page_preview": "true"}).encode()
+        try:
+            status, _ = http(f"https://api.telegram.org/bot{token}/sendMessage", data=data)
+            log(f"telegram -> {chat}: HTTP {status}")
+        except Exception as e:
+            log(f"telegram -> {chat} failed: {e}")
 
 
 def notify_ntfy(text):

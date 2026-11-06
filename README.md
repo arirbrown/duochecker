@@ -11,7 +11,7 @@ Set any of these as repo secrets (Settings → Secrets and variables → Actions
 | Secret | Channel | Value |
 |---|---|---|
 | `CALLMEBOT_RECIPIENTS` | WhatsApp (free, each person gets their own message) | `+19175551234:APIKEY1,+16175559876:APIKEY2` |
-| `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` | Telegram (works with group chats) | bot token from @BotFather; group chat id |
+| `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` | Telegram (works with group chats) | bot token from @BotFather; group chat id, or comma-separated personal chat ids |
 | `NTFY_TOPIC` | Push notification through the ntfy app | a hard-to-guess topic name |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`, `TWILIO_TO` | SMS (paid; US numbers need A2P/toll-free verification) | `TWILIO_TO` can be comma-separated |
 
