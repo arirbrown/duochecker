@@ -176,6 +176,10 @@ def main():
                "512GB (Night Sky or Star White) is available for pickup in NYC or Boston.")
         return
 
+    channels = [name for name, var in (("whatsapp", "CALLMEBOT_RECIPIENTS"), ("telegram", "TELEGRAM_BOT_TOKEN"),
+                                       ("ntfy", "NTFY_TOPIC"), ("sms", "TWILIO_TO")) if os.getenv(var)]
+    log(f"alert channels: {', '.join(channels) or 'NONE (set secrets!)'}; checking every {args.interval}s")
+
     known = load_state(args.state)
     deadline = time.time() + args.duration if args.duration else None
     failures = checks = 0
