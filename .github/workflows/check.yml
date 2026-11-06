@@ -1,0 +1,51 @@
+name: duochecker
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      test_notify:
+        description: "Send a test alert and exit"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths: ["checker.py", ".github/workflows/check.yml"]
+
+# One checker at a time; the next scheduled run waits in the queue and takes over when this one ends.
+concurrency:
+  group: duochecker
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    env:
+      CALLMEBOT_RECIPIENTS: ${{ secrets.CALLMEBOT_RECIPIENTS }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+      TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+      TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+      TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+      TWILIO_TO: ${{ secrets.TWILIO_TO }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Send test alert
+        if: ${{ inputs.test_notify }}
+        run: python3 checker.py --test-notify
+
+      - name: Restore last-known stock
+        if: ${{ !inputs.test_notify }}
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: state-${{ github.run_id }}
+          restore-keys: state-
+
+      - name: Watch stock (~5h45m, every 60s)
+        if: ${{ !inputs.test_notify }}
+        run: python3 checker.py --interval 60 --duration 20700
