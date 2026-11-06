@@ -1,0 +1,16 @@
+name: rate probe
+# Measures how often Apple's pickup endpoint can be polled before it starts returning HTTP 541. Sends no alerts.
+on:
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        interval: [10, 20, 30, 60]
+    steps:
+      - uses: actions/checkout@v4
+      - run: curl -s https://api.ipify.org; echo
+      - run: python3 checker.py --interval ${{ matrix.interval }} --duration 900 --state /tmp/s.json
