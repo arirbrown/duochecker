@@ -1,11 +1,17 @@
 name: morning burst
 # 6-7am ET is the high-volume restock window: check every 30s then.
-# Scheduled for 5:30 ET because GitHub cron often starts late; both crons exist so it works in EST and EDT.
+# The always-on checker (check.yml) dispatches this at ~5:45 ET because GitHub cron can start hours late.
+# The crons are a backup; both exist so it works in EST and EDT. Late or duplicate runs skip themselves.
 on:
   schedule:
     - cron: "30 9 * * *"
     - cron: "30 10 * * *"
   workflow_dispatch:
+    inputs:
+      now:
+        description: "Run for 1 hour starting now instead of 6-7am ET"
+        type: boolean
+        default: false
 
 concurrency:
   group: burst
@@ -23,6 +29,7 @@ jobs:
       TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
       TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
       TWILIO_TO: ${{ secrets.TWILIO_TO }}
+      BURST_NOW: ${{ inputs.now }}
     steps:
       - uses: actions/checkout@v4
       - name: Wait for 6:00 ET, then check every 30s until 7:00 ET

@@ -9,6 +9,7 @@ import time
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 PARTS = {
     "MK1H4LL/A": "iPhone Duo 512GB Night Sky",
@@ -59,6 +60,30 @@ def http(url, data=None, headers=None, timeout=20):
     req = urllib.request.Request(url, data=data, headers={"User-Agent": UA, **(headers or {})})
     with OPENER.open(req, timeout=timeout) as r:
         return r.status, r.read().decode("utf-8", "replace")
+
+
+def dispatch_burst():
+    """Starts the morning burst workflow via the GitHub API (needs GITHUB_TOKEN with actions: write)."""
+    repo = os.environ["GITHUB_REPOSITORY"]
+    status, _ = http(f"https://api.github.com/repos/{repo}/actions/workflows/burst.yml/dispatches",
+                     data=b'{"ref":"main"}',
+                     headers={"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+                              "Accept": "application/vnd.github+json", "Content-Type": "application/json"})
+    return status
+
+
+def maybe_dispatch_burst(started, now=None):
+    """GitHub cron can start hours late, so the always-on checker starts the 6-7am ET burst itself."""
+    if not (os.getenv("BURST_DISPATCH") and os.getenv("GITHUB_TOKEN")):
+        return
+    now = now or datetime.now(ZoneInfo("America/New_York"))
+    if now.date() in started or not (5 * 60 + 45 <= now.hour * 60 + now.minute < 6 * 60 + 50):
+        return
+    try:
+        log(f"started morning burst: HTTP {dispatch_burst()}")
+        started.add(now.date())
+    except Exception as e:
+        log(f"morning burst dispatch failed: {e}")
 
 
 def fetch_zip(zip_code):
@@ -199,7 +224,9 @@ def main():
     failures = checks = 0
     status_alerts = bool(os.getenv("STATUS_ALERTS"))
     blocked_alerted = False
+    burst_started = set()
     while True:
+        maybe_dispatch_burst(burst_started)
         checks += 1
         try:
             in_stock, seen = check()

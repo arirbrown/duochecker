@@ -1,0 +1,13 @@
+name: dispatch test
+on: workflow_dispatch
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -c "import checker; print('dispatch HTTP', checker.dispatch_burst())"
