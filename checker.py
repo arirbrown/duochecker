@@ -197,11 +197,16 @@ def main():
     known = load_state(args.state)
     deadline = time.time() + args.duration if args.duration else None
     failures = checks = 0
+    status_alerts = bool(os.getenv("STATUS_ALERTS"))
+    blocked_alerted = False
     while True:
         checks += 1
         try:
             in_stock, seen = check()
             failures = 0
+            if blocked_alerted:
+                notify("Duo Checker is back online and checking stores again.")
+                blocked_alerted = False
             current = set(in_stock)
             new = {k: v for k, v in in_stock.items() if k not in known}
             if new or checks % 60 == 1:
@@ -220,6 +225,10 @@ def main():
         except Exception as e:
             failures += 1
             log(f"check failed ({failures}): {e}")
+            if status_alerts and failures == 2 and not blocked_alerted:
+                notify("Duo Checker is blocked by Apple right now, so no stock alerts until it's back "
+                       "(usually about 30 minutes). You'll get a message when it's checking again.")
+                blocked_alerted = True
             # SLOW_DOWN_TO=N: after a block, keep polling at the slower interval N instead of the original rate.
             if os.getenv("SLOW_DOWN_TO") and args.interval < int(os.environ["SLOW_DOWN_TO"]):
                 args.interval = int(os.environ["SLOW_DOWN_TO"])
