@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ari.duochecker.morning</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/aribrown/duochecker/mac-morning.sh</string>
+    </array>
+    <!-- Local Mac time. 2:55 covers Pacific time, 5:55 covers Eastern time if the Mac is set to ET. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Hour</key><integer>2</integer><key>Minute</key><integer>55</integer></dict>
+        <dict><key>Hour</key><integer>5</integer><key>Minute</key><integer>55</integer></dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/Users/aribrown/Library/Logs/duochecker-morning.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/aribrown/Library/Logs/duochecker-morning.log</string>
+</dict>
+</plist>
