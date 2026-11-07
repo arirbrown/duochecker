@@ -220,6 +220,10 @@ def main():
         except Exception as e:
             failures += 1
             log(f"check failed ({failures}): {e}")
+            # SLOW_DOWN_TO=N: after a block, keep polling at the slower interval N instead of the original rate.
+            if os.getenv("SLOW_DOWN_TO") and args.interval < int(os.environ["SLOW_DOWN_TO"]):
+                args.interval = int(os.environ["SLOW_DOWN_TO"])
+                log(f"slowing down to every {args.interval}s")
         # Back off (up to 5 min) if Apple starts erroring or rate-limiting.
         wait = min(300, args.interval * 2 ** failures) if failures else args.interval
         if args.once or (deadline and time.time() + wait > deadline):
