@@ -24,6 +24,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ github.token }}
       BURST_DISPATCH: "1"
+      CHAIN_NEXT: "1"
       CALLMEBOT_RECIPIENTS: ${{ secrets.CALLMEBOT_RECIPIENTS }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

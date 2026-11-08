@@ -62,14 +62,18 @@ def http(url, data=None, headers=None, timeout=20):
         return r.status, r.read().decode("utf-8", "replace")
 
 
-def dispatch_burst():
-    """Starts the morning burst workflow via the GitHub API (needs GITHUB_TOKEN with actions: write)."""
+def dispatch_workflow(workflow):
+    """Starts a workflow in this repo via the GitHub API (needs GITHUB_TOKEN with actions: write)."""
     repo = os.environ["GITHUB_REPOSITORY"]
-    status, _ = http(f"https://api.github.com/repos/{repo}/actions/workflows/burst.yml/dispatches",
+    status, _ = http(f"https://api.github.com/repos/{repo}/actions/workflows/{workflow}/dispatches",
                      data=b'{"ref":"main"}',
                      headers={"Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
                               "Accept": "application/vnd.github+json", "Content-Type": "application/json"})
     return status
+
+
+def dispatch_burst():
+    return dispatch_workflow("burst.yml")
 
 
 def maybe_dispatch_burst(started, now=None):
@@ -225,8 +229,16 @@ def main():
     status_alerts = bool(os.getenv("STATUS_ALERTS"))
     blocked_alerted = False
     burst_started = set()
+    next_queued = False
     while True:
         maybe_dispatch_burst(burst_started)
+        # GitHub cron can start the next run late; queue our own successor ~15 min before this run ends.
+        if os.getenv("CHAIN_NEXT") and deadline and not next_queued and time.time() > deadline - 900:
+            try:
+                log(f"queued next checker run: HTTP {dispatch_workflow('check.yml')}")
+                next_queued = True
+            except Exception as e:
+                log(f"queueing next checker run failed: {e}")
         checks += 1
         try:
             in_stock, seen = check()
